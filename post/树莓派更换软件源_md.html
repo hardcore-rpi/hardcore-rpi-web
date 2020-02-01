@@ -1,0 +1,31 @@
+<h1>Test</h1>
+
+<h1>树莓派更换软件源</h1>
+
+<article>
+  <p>在上一期 <a href="https://www.jianshu.com/p/e4c21b87920a">树莓派 4B 安装与启动</a> 中，我给大家介绍了如何给树莓派安装操作系统并启动。</p>
+<p>但是在开始树莓派的各种 DIY 之前，我们还需要做一件事情：<strong>更换树莓派软件源</strong>。</p>
+<p>这里我简单解释下什么是软件源，以及为什么要更换软件源。</p>
+<p>软件源是指 debian 系操作系统的应用程序安装包仓库，很多的软件都会这收录到这个仓库里面。而树莓派的 raspberrypi 操作系统也是基于 debian 的，所以树莓派也有自己的软件源，用来收录各种树莓派应用程序。</p>
+<p>默认情况下，树莓派软件源地址是 <a href="http://archive.raspbian.org/">http://archive.raspbian.org/</a>，位于欧洲，在国内访问是非常慢的，经常只有几 k 每秒的下载速率。所以我们在玩转树莓派之前，强烈推荐替换成国内的软件源。</p>
+<p>树莓派的所有软件源地址可以从这里找到：<a href="https://www.raspbian.org/RaspbianMirrors">https://www.raspbian.org/RaspbianMirrors</a></p>
+<p>一般我们找个国内的就行了，比如清华大学的（下图表格的第一行）</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-9c74c15bf7731e97.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<h1 id="更换软件源">更换软件源</h1>
+<p>这一步要开始更换软件源了。确保树莓派 WiFi 已经连上。</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-935c934b5b29a327.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>接下来的操作需要一点点命令行知识，如果不了解命令行也没关系，按照步骤进行就 ok。</p>
+<p>首先点击桌面左上角的命令行按钮，进入命令行窗口</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-16a94dc4cc87e424.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>然后在命令行窗口内输入 <code>sudo nano /etc/apt/sources.list</code> 并回车，进入编辑器。</p>
+<blockquote>
+<p>sudo 是指用系统管理员权限启动，nano 是树莓派内置的轻量文本编辑器，而 /etc/apt/sources.list 就是软件源的配置文件地址了。</p>
+</blockquote>
+<p>接着编辑这个文件，如下图所示，把 ① 注释掉（最前面加 # 号），在文件最顶部添加 ② <code>deb http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ buster main contrib non-free rpi</code> ，按 ctrl-o 保存，按 ctrl-x 关闭。</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-b263124884c1bcbd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>同样的方法，把 <code>/etc/apt/sources.list.d/raspi.list</code> 的内容也替换成 <code>deb http://mirrors.ustc.edu.cn/archive.raspberrypi.org/debian buster main</code></p>
+<p><img src="/media/15766800904417/15787950483325.jpg" alt="-w1070"></p>
+<p>至此，树莓派软件源就替换好了。是不是很简单，就改两行配置即可。</p>
+<p>下一期，我们会在新的软件源的基础上，来手把手打造一个家庭影院：<a href="https://www.jianshu.com/p/5f1dae1fc8d3">树莓派投屏秒变家庭影院（安装 kodi）</a></p>
+
+</article>

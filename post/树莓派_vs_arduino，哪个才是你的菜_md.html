@@ -1,0 +1,76 @@
+<h1>Test</h1>
+
+<h1>树莓派 VS Arduino，哪个才是你的菜</h1>
+
+<article>
+  <p>说到树莓派，很多人喜欢把它和 Arduino 对比：前者性能高但软件结构复杂，后者性能有限但容易上手。</p>
+<p>当要开始一个个人项目的时候，到底哪种微型计算机才合适？本文将解答这个问题。</p>
+<p><img src="http://assets.biko.pub/2020/01/02/15778903067412.jpg" alt="-w360"></p>
+<p><img src="http://assets.biko.pub/2020/01/02/15778903835956.jpg" alt="-w284"></p>
+<h1 id="区别">区别</h1>
+<p>树莓派和 Arduino 看起来很相似，都是带控制功能的小型电路板，但它们完全是属于两种不同的设备。</p>
+<p>树莓派是基于<strong>微处理器</strong>的硬件平台，核心是 Broadcom ARM 架构 CPU，可以完整运行 Ubuntu、Windows 10 IoT Core 等操作系统，甚至板载了 USB、以太网和 HDMI 等输入输出设备接口，能外接键盘显示器等。</p>
+<p>Arduino 则是基于<strong>微控制器</strong>的硬件平台，核心是工业控制领域常见的 ATmega 系列芯片，只能执行提前烧录进芯片的程序。比如常用的 Arduino UNO 采用的是 ATmega328，只有8位数据宽度，16MHz 晶振时钟。</p>
+<p>我们拿 2019 年最新发布的树莓派 4B 和 Arduino 里最流行的 UNO 做一个对比：</p>
+<table>
+<thead>
+<tr>
+<th>关键参数</th>
+<th>树莓派 4B</th>
+<th>Arduino UNO</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CPU/MCU</td>
+<td>Broadcom BCM2711，64-bit，4核心，ARM Cortex-A72 架构</td>
+<td>ATmega328，8-bit</td>
+</tr>
+<tr>
+<td>时钟频率</td>
+<td>1.5GHz</td>
+<td>16MHz</td>
+</tr>
+<tr>
+<td>RAM</td>
+<td>1、2、4 GB LPDDR4-3200 RAM</td>
+<td>2KB SRAM</td>
+</tr>
+<tr>
+<td>ROM</td>
+<td>取决于外置 Micro SD 卡容量</td>
+<td>32KB FLASH</td>
+</tr>
+<tr>
+<td>可编程 IO</td>
+<td>17 个</td>
+<td>14 个</td>
+</tr>
+<tr>
+<td>外设</td>
+<td>PWM、4xURAT、4xSPI、4xIIC</td>
+<td>PWM、模拟输入</td>
+</tr>
+<tr>
+<td>网络通信</td>
+<td>以太网、蓝牙、Wi-Fi</td>
+<td>-</td>
+</tr>
+<tr>
+<td>功耗</td>
+<td>3~6.25W</td>
+<td>0.25W</td>
+</tr>
+</tbody></table>
+<p>可以明显看出，树莓派不仅性能要高出几个量级，而且能运行操作系统，不仅可以操作可编程 io，还可以完成图形图像处理、网络通信等任务。</p>
+<p>但正是因为树莓派搭载了操作系统，所以它的软件复杂度要高得多。比如最简单的点亮一盏 LED 灯，在树莓派上你需要安装操作系统，安装 GPIO 程序库，编写代码，配置开机自动执行等。Arduino 上则极其简单，用官方提供的 IDE 工具编写 C 代码，通过 USB 烧录进芯片，开机即可运行。</p>
+<p>总的来说，<strong>树莓派是全功能的卡片电脑，而 Arduino 是剪裁用于特定用途的微控器</strong>。对于一些简单的场景，这两款硬件都可以胜任，但还是有一些区别：如果有网络通信、图形图像、大计算量的需求，就只能选用树莓派；如果需要精细控制 GPIO，比如模拟 spi 协议和传感器通信等，则选用 Arduino 会更简单。</p>
+<p>当然，掌握了一定的编程能力之后，完全可以联用这两种硬件，树莓派做上位机负责管理系统，Arduino 做下位机负责控制其他硬件，实现优势互补。</p>
+<h1 id="参考资料">参考资料</h1>
+<ul>
+<li><a href="https://store.arduino.cc/usa/arduino-uno-rev3">ARDUINO UNO REV3</a></li>
+<li><a href="https://www.raspberrypi.org/blog/another-update-raspbian/">The latest update to Raspbian</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/98076566">树莓派 4B 详细资料</a></li>
+<li><a href="https://www.arduino.cn/thread-42417-1-1.html">Arduino各开发板的比较</a></li>
+</ul>
+
+</article>

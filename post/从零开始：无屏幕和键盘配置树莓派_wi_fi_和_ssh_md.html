@@ -1,0 +1,66 @@
+<h1>Test</h1>
+
+<h1>从零开始：无屏幕和键盘配置树莓派 WiFi 和 SSH</h1>
+
+<article>
+  <p>树莓派的很多 DIY 玩法都要求联网和 ssh 登录，但这对于没有屏幕、没有键盘、没有网线的裸板树莓派玩家来说，就不是一件特别容易的事了。</p>
+<p>幸运的是，树莓派官方在2016年5月的<a href="https://www.raspberrypi.org/blog/another-update-raspbian/">发布日志</a>里提到，Raspbian 系统支持用户在 boot 目录下新建 <code>wpa_supplicant.conf</code> 和 <code>ssh</code> 文件开机初始化 WiFi 和 ssh。</p>
+<p>这个小技巧对于裸板树莓派玩家尤其有用。</p>
+<h1 id="配置-wifi">配置 WiFi</h1>
+<p>将刷好 Raspbian 系统的 SD 卡用电脑读取。在 boot 分区，也就是树莓派的 /boot 目录下新建 <code>wpa_supplicant.conf</code> 文件。按如下格式写入：</p>
+<pre><code>ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=&lt;Insert country code here&gt;
+
+network={
+ ssid=&quot;&lt;Name of your WiFi&gt;&quot;
+ psk=&quot;&lt;Password for your WiFi&gt;&quot;
+}</code></pre><p><code>&lt;Insert country code here&gt;</code> 是地区代码，换成 <code>CN</code> （CN 指中国大陆）即可。</p>
+<blockquote>
+<p>在 <a href="https://www.iso.org/obp/ui/">https://www.iso.org/obp/ui/</a> 这个地址可以查看所有地区代码</p>
+</blockquote>
+<p><code>&lt;Name of your WiFi&gt;</code> 换成 WiFi 名，<code>&lt;Password for your WiFi&gt;</code> 换成 WiFi 密码明文。</p>
+<p>当树莓派启动的时候，这个文件会被移动到 <code>/etc/wpa_supplicant/</code> 配置目录下，覆盖掉原来的网络配置。</p>
+<p>一些注意事项：</p>
+<ol>
+<li>最好填 2.4G 的 WiFi，网卡兼容性更好</li>
+</ol>
+<h2 id="无密码网络">无密码网络</h2>
+<p>如果 WiFi 不需要密码，则需要配置 <code>key_mgmt=NONE</code>，比如：</p>
+<pre><code>network={
+    ssid=&quot;testing&quot;
+    key_mgmt=NONE
+}</code></pre><h2 id="隐藏网络">隐藏网络</h2>
+<p>有些 WiFi 设置了隐藏，则需要配置 <code>scan_ssid=1</code>，比如：</p>
+<pre><code>network={
+    ssid=&quot;yourHiddenSSID&quot;
+    scan_ssid=1
+    psk=&quot;Your_wifi_password&quot;
+}</code></pre><h2 id="多-wifi-配置">多 WiFi 配置</h2>
+<p>树莓派可以同时配置多个 WiFi，只需要配置多个 <code>network</code> 即可，比如：</p>
+<pre><code>network={
+    ssid=&quot;SchoolNetworkSSID&quot;
+    psk=&quot;passwordSchool&quot;
+    priority=1
+    id_str=&quot;school&quot;
+}
+
+network={
+    ssid=&quot;HomeNetworkSSID&quot;
+    psk=&quot;passwordHome&quot;
+    priority=2
+    id_str=&quot;home&quot;
+}</code></pre><p><code>id_str</code> 是标识符。<code>priority</code> 是优先级，越大优先级越高。</p>
+<h1 id="配置-ssh">配置 ssh</h1>
+<p>和 WiFi 配置相似，同样在 boot 分区新建一个空白文件，命名为 <code>ssh</code>。注意要小写且不要有任何扩展名。</p>
+<p>当树莓派启动的时候，会去检查 boot 目录。如果有 <code>ssh</code> 文件，就会开启 ssh 服务。</p>
+<h1 id="参考资料">参考资料</h1>
+<ol>
+<li><a href="https://www.raspberrypi.org/blog/another-update-raspbian/">The latest update to Raspbian</a></li>
+<li><a href="https://raspberrypi.stackexchange.com/questions/10251/prepare-sd-card-for-wifi-on-headless-pi/57023#57023">Prepare SD card for Wifi on Headless Pi</a></li>
+<li><a href="https://www.raspberrypi.org/documentation/remote-access/ssh/">SSH (Secure Shell)</a></li>
+<li><a href="https://www.raspberrypi.org/documentation/configuration/wireless/headless.md">Setting up a Raspberry Pi headless</a></li>
+<li><a href="http://shumeipai.nxez.com/2017/09/13/raspberry-pi-network-configuration-before-boot.html">http://shumeipai.nxez.com/2017/09/13/raspberry-pi-network-configuration-before-boot.html</a></li>
+</ol>
+
+</article>

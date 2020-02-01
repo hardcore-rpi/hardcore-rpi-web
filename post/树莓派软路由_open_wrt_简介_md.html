@@ -1,0 +1,48 @@
+<h1>Test</h1>
+
+<h1>树莓派软路由 OpenWrt 简介</h1>
+
+<article>
+  <p><img src="/media/15780209818763/15780328251715.jpg" alt=""></p>
+<p>用树莓派 DIY 软路由的时候，总会说到 <a href="https://openwrt.org/">OpenWrt</a> 这个开源 Linux 发行版。那 OpenWrt 到底是什么，为什么会用于树莓派软路由？这篇文章将会解答关于 OpenWrt 的一系列问题。</p>
+<h2 id="openwrt-是什么">OpenWrt 是什么</h2>
+<p>OpenWrt 是一个面向嵌入式设备的 Linux 操作系统，常用于小型无线路由器。</p>
+<blockquote>
+<p>The OpenWrt Project is a Linux operating system targeting embedded devices. Instead of trying to create a single, static firmware, OpenWrt provides a fully writable filesystem with package management. This frees you from the application selection and configuration provided by the vendor and allows you to customize the device through the use of packages to suit any application. For developers, OpenWrt is the framework to build an application without having to build a complete firmware around it; for users this means the ability for full customization, to use the device in ways never envisioned.</p>
+</blockquote>
+<p>Cisco/Linksys(思科) 在 2003 年发布了 WRT54G 这款无线路由器，同年有人发现它的操作系统是基于Linux的，然而 Linux 是基于GPL许可证发布的，按照该许可证 Cisco 应该把 WRT54G 的源代码公开。2003年3月，Cisco 迫于公众压力公开了 WRT54G 的源代码。此后就有了一些基于 Cisco 源码的第三方路由器固件，OpenWrt 就是其中的一个。</p>
+<p>2004年1月，OpenWrt 项目启动。第一版的 OpenWrt 基于 Linksys GPL sources for WRT54G  开发，也是现在广泛使用的版本。</p>
+<p>2005年，OpenWrt 发布实验性版本，开始使用官方 GNU/Linux 的内核。</p>
+<p>2007年，发布 White Russian（已不再维护）</p>
+<p>2010年，发布 <a href="https://openwrt.org/releases/10.03/notes-10.03">Backfire</a>（已不再维护）。基于 Linux 2.6.32 long term support kernel, uClibc 0.9.30。</p>
+<p>2013年，发布 <a href="https://openwrt.org/releases/12.09/notes-12.09">Attitude Adjustment</a>。基于 Linux Kernel 3.3, uClibc 0.9.33.2，支持 <strong>bcm2708 (Raspberry Pi)</strong> 平台。</p>
+<h2 id="openwrt-在树莓派上的应用">OpenWrt 在树莓派上的应用</h2>
+<p>OpenWrt 天生服务于嵌入式无线路由器，而且 2013 年发布的 Attitude Adjustment 版本还官方支持了树莓派平台，所以用 OpenWrt 打造树莓派软路由变成一件很酷又相对简单的事情。</p>
+<p>在官方的<a href="https://openwrt.org/toh/views/toh_fwdownload">支持列表</a>中，找到树莓派，下载相应的系统镜像，就可以开始软路由 DIY 之旅了。</p>
+<p><img src="/media/15780209818763/15780347790092.jpg" alt="-w1303"></p>
+<p>或者直达 OpenWrt 的 raspberry pi 专题页面：<a href="https://openwrt.org/toh/raspberry_pi_foundation/raspberry_pi">https://openwrt.org/toh/raspberry_pi_foundation/raspberry_pi</a></p>
+<h2 id="软路由性能">软路由性能</h2>
+<p>在树莓派 3B 以及以前的硬件版本中，OpenWrt 软路由性能并不是特别理想：</p>
+<ul>
+<li>USB 和 LAN 口共享带宽，造成网络传输瓶颈（USB 用于无线网卡，LAN 用于以太网）</li>
+<li>CPU 计算性能不高</li>
+</ul>
+<p>但2019年发布的树莓派 4B 已经不存在上述问题了：板载千兆以太网卡、2.4/5 GHz 802.11b/g/n/ac 无线网卡，USB 和 LAN 口各自独立，CPU 提速 4 倍，还能选配 4G RAM。</p>
+<p>CPU 性能对比：</p>
+<p><img src="/media/15780209818763/15781167744427.png" alt=""></p>
+<p>以太网卡速率对比：</p>
+<p><img src="/media/15780209818763/15780695858226.jpg" alt=""></p>
+<p>无线网卡速率对比：</p>
+<p><img src="/media/15780209818763/15781168703194.png" alt=""></p>
+<p>RAM 速率对比：</p>
+<p><img src="/media/15780209818763/15781168135215.png" alt=""></p>
+<h2 id="参考资料">参考资料</h2>
+<ul>
+<li><a href="https://openwrt.org/about/history">OpenWrt Version History</a></li>
+<li><a href="https://openwrt.org/about">About the OpenWrt/LEDE project</a></li>
+<li><a href="https://network.pconline.com.cn/pingce/0802/1230232_all.html">经典回顾 54M无线霸主Linksys WRT54G评测</a></li>
+<li><a href="https://forum.openwrt.org/t/raspberry-pi-4-released/39444">Raspberry Pi 4 released - Hardware Questions and Recommendations - OpenWrt Forum</a>
+<a href="https://magpi.raspberrypi.org/articles/raspberry-pi-4-specs-benchmarks">Raspberry Pi 4 specs and benchmarks — The MagPi magazine</a></li>
+</ul>
+
+</article>

@@ -1,0 +1,69 @@
+<h1>Test</h1>
+
+<h1>树莓派 4B 安装和启动</h1>
+
+<article>
+  <p>树莓派 4B 是一款来源于英国慈善组织“Raspberry Pi 基金会”，发布于 2019年6月的卡片电脑。</p>
+<p><a href="https://www.jianshu.com/p/9a5ae3d2c598">树莓派 4B 详细资料</a>
+<a href="https://www.jianshu.com/p/160a5eecf241">树莓派 4B 开箱记录</a></p>
+<p>树莓派整个电路板就和信用卡这么大，内置了以太网、WiFi、蓝牙、USB、HDMI 等接口。背面有一个 micro SD 插槽，只需要把官方提供的操作系统镜像写到 micro SD 卡，然后插进去，就能启动树莓派了。</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-d5feb8877985fecf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-d5b25cc0b2504f92.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="micro SD 插槽"></p>
+<p>新买回来的树莓派只是一块裸的电路板，需要准备好 SD 卡、各种线材等，才能启动。</p>
+<p>我这篇文章来教大家，新买的树莓派该如何安装系统和启动。</p>
+<h1 id="准备-micro-sd-卡">准备 micro SD 卡</h1>
+<p>完整的树莓派系统镜像超过 4G。所以如果想安装完整版的系统，官方建议准备一张至少 8G 的 SD 卡。但如果是安装精简版系统，4G 的 SD 卡也可以。</p>
+<p>只是现在的 SD 卡在 tb 上已经卖成白菜价了，一般直接买张 32G 的卡即可，外加一个 USB 读卡器。</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-d069e53ec89c731e.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="SD 卡"></p>
+<h1 id="下载导入系统镜像">下载导入系统镜像</h1>
+<p>SD 卡要导入树莓派的系统镜像。</p>
+<p>前往树莓派官方的操作系统下载页面：<a href="https://www.raspberrypi.org/downloads/">https://www.raspberrypi.org/downloads/</a></p>
+<p>我下载的是个人比较喜欢树莓派官方的 Raspbian 系统：<a href="https://www.raspberrypi.org/downloads/raspbian/">https://www.raspberrypi.org/downloads/raspbian/</a></p>
+<p>这一步，我要把刚刚下载好的系统镜像导入到 SD 卡里。树莓派官方推荐 MAC 系统用 <a href="https://www.balena.io/etcher/">balenaEtcher</a>
+这个软件来执行导入。</p>
+<blockquote>
+<p><a href="https://www.raspberrypi.org/documentation/installation/installing-images/README.md">Installing operating system images</a></p>
+</blockquote>
+<p>balenaEtcher 操作界面很简洁，选择镜像文件，然后选择 SD 卡储存器，接着点击“Flash”按钮，就开始写入读条了。</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-875f5ad72c1ddd51.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-fb68a1bf20b803b5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<h1 id="准备线材">准备线材</h1>
+<p>树莓派是卡片电脑，正常来说，要连接鼠标、键盘和显示器，然后才能用。但刚买回来的树莓派，还没有准备这么齐全，所以可以先只连接显示屏，看下树莓派能否点亮显示器。如果能点亮，就说明树莓派启动成功了。</p>
+<p>此时要准备好的东西：</p>
+<ol>
+<li>树莓派 4B</li>
+<li>已导入系统镜像的 micro SD 卡</li>
+<li>支持 HDMI 输入的显示器</li>
+<li>iPad 充电头</li>
+<li>micro HDMI 线</li>
+<li>USB-C 电源线</li>
+</ol>
+<p>在这里我要解释下这几样东西。</p>
+<p>首先是充电头。如果树莓派 4B 裸板不连接任何其他设备启动，约消耗 0.6A 电流；满负载连接外部设备，比如 USB 接口、网线、HDMI 接口全插满情况下，约消耗 1.2A 电流。通常电源适配器输出要留一点冗余度，才能保证稳定，所以充电头至少要能输出 1.2A 的电流。支持快充的充电头、iPad 充电头都可以。这里我用的是 iPad 充电头。</p>
+<p>关于树莓派电源和功率消耗的详细信息可以查看下面几个网站：</p>
+<ol>
+<li><a href="https://www.raspberrypi.org/documentation/faqs/#pi-power">https://www.raspberrypi.org/documentation/faqs/#pi-power</a></li>
+<li><a href="https://www.raspberrypi.org/blog/raspberry-pi-4-on-sale-now-from-35/">https://www.raspberrypi.org/blog/raspberry-pi-4-on-sale-now-from-35/</a></li>
+<li><a href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711/rpi_DATA_2711_1p0_preliminary.pdf">https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711/rpi_DATA_2711_1p0_preliminary.pdf</a></li>
+</ol>
+<p>然后是 micro HDMI 线。树莓派的高清接口是最小的那种插口，使用的时候一定要选对 HDMI 线。</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1846637-a2676f258aacb8f7.jpg" alt="HDMI 线示意图"></p>
+<p>最后要注意的是电源线。树莓派 4B 运行功率更高，所以电源插口也改成支持更大电流的 USB-C 了，与上一代树莓派 3B 的 micro USB 不一样。</p>
+<h1 id="启动树莓派">启动树莓派</h1>
+<p>启动树莓派的过程就比较简单了，把上一步准备好的线材都连接到位，然后接通电源就行。</p>
+<p>我建议的操作步骤是：</p>
+<ol>
+<li>插入 SD 卡</li>
+<li>连接 HDMI 显示器，同时把显示器电源打开</li>
+<li>连接树莓派电源线，接通电源</li>
+</ol>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-00d3690867ec7a62.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>树莓派电源接口边上有两个指示灯，如图所示，1 是绿色的硬盘灯，2 是红色的电源灯。</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-cee70251b99f4aaf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>接通电源后，红灯会亮起来，表示已连接电源，同时绿灯闪烁，表示树莓派正在读取 SD 卡。过一会儿后，显示器就会出现树莓派的 logo；再过一会儿，就会出现树莓派的系统桌面了。</p>
+<p>树莓派首次启动，留下纪念照一张</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-99c2be49c5aa3bdd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>上一期：<a href="https://www.jianshu.com/p/160a5eecf241">树莓派 4B 开箱记录</a>
+下一期：<a href="https://www.jianshu.com/p/f4ff50214e12">树莓派更换软件源</a></p>
+
+</article>

@@ -1,0 +1,45 @@
+<h1>Test</h1>
+
+<h1>树莓派投屏秒变家庭影院（安装 kodi）</h1>
+
+<article>
+  <p>在上一期的 <a href="https://www.jianshu.com/p/f4ff50214e12">树莓派更换软件源</a> 中，我给大家介绍了如何更换软件源，以便更快速地安装树莓派应用。</p>
+<p>这次我就来手把手教大家打造一个家庭影院。</p>
+<p>这个过程比较复杂，用一篇文章的篇幅基本讲不清楚，所以我打算围绕树莓派家庭影院这个主题写成一系列文章，真正地“手把手”。</p>
+<blockquote>
+<p>至于为什么是打造家庭影院，主要还是因为我有台电视机，想把手机投屏到上面看电影，但又不想买电视盒子，干脆就用树莓派来打造好了。</p>
+</blockquote>
+<p>先上首次运行成功图两张</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-9c737f7d59d61eb3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-fb0d88305558e9ef.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<h1 id="安装-kodi">安装 kodi</h1>
+<p>kodi 是一个屡获殊荣的自由和开源的跨平台媒体播放器和用于 HTPC（Home theater PC，家庭影院PC）的数字媒体娱乐中心软件，可以运行在 Linux、OSX、Windows、Android 系统。最初为 Xbox 而开发，叫 XBMC(全称是XBOX Media Center)，顾名思义就是 Xbox 平台的媒体中心。</p>
+<p>更多关于 kodi 的介绍可以看它的官网：<a href="http://kodi.tv/about/xbmc-foundation">http://kodi.tv/about/xbmc-foundation</a></p>
+<p>这一小节就教大家把 kodi 安装到树莓派上。</p>
+<blockquote>
+<p>此部分内容需要一点点的命令行基础，并能通过 ssh 连接登录树莓派</p>
+</blockquote>
+<p>首先 ssh 登录树莓派，安装 kodi 软件包：</p>
+<pre><code>sudo apt-get update
+sudo apt-get install kodi</code></pre><blockquote>
+<p>执行安装之前，强烈建议先给树莓派更新软件源，否则软件包下载速度会非常慢：<a href="https://www.jianshu.com/p/f4ff50214e12">树莓派更换软件源</a></p>
+</blockquote>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-869d887c4e6dee5b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>更多的官方安装教程可以参考：</p>
+<ul>
+<li><a href="https://kodi.wiki/view/HOW-TO:Install_Kodi_on_Raspberry_Pi">https://kodi.wiki/view/HOW-TO:Install_Kodi_on_Raspberry_Pi</a></li>
+</ul>
+<h1 id="首次启动-kodi">首次启动 kodi</h1>
+<p>我们先简单启动下 kodi，验证是否能正常运行。</p>
+<p>验证方式非常简单，按如下步骤进行：</p>
+<ol>
+<li>树莓派 HDMI 连接上显示器，并通电启动</li>
+<li>ssh 登录树莓派</li>
+<li>命令行输入 <code>kodi</code> 启动</li>
+</ol>
+<p>命令执行后，显示器就会出现 kodi 的界面，说明 kodi 已经成功运行起来了！</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1846637-2b7e087af8dd5e8b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>既然 kodi 已经运行起来了，下一步就要继续优化树莓派家庭影院，让它真正能玩起来。</p>
+<p>下一期，我会教大家如何遥控 kodi，并实现手机投屏。</p>
+
+</article>
