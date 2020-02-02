@@ -1,0 +1,1 @@
+(window.webpackJsonp_name_=window.webpackJsonp_name_||[]).push([[148],{"./node_modules/_highlight.js@9.15.10@highlight.js/lib/languages/shell.js":function(s,n){s.exports=function(s){return{aliases:["console"],contains:[{className:"meta",begin:"^\\s{0,3}[\\w\\d\\[\\]()@-]*[>%$#]",starts:{end:"$",subLanguage:"bash"}}]}}}}]);
