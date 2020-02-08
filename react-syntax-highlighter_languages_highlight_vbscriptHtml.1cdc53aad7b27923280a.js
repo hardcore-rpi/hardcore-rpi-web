@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[170],{"./node_modules/_highlight.js@9.15.10@highlight.js/lib/languages/vbscript-html.js":function(n,s){n.exports=function(n){return{subLanguage:"xml",contains:[{begin:"<%",end:"%>",subLanguage:"vbscript"}]}}}}]);
