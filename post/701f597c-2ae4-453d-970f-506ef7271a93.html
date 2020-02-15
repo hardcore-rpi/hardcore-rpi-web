@@ -18,15 +18,27 @@
     
     
       
-        <link rel="prefetch" href="/post.fa6538127f0557943635.js">
+        <link rel="prefetch" href="/post.pc.f5c10667620e3fe4438d.js">
       
     
       
-        <link rel="prefetch" href="/home.dee10def206a398eec38.js">
+        <link rel="prefetch" href="/home.pc.225e5e24b9f075bb31e3.js">
       
     
       
-        <link rel="prefetch" href="/tag.54321a3e2e1e5e3df844.js">
+        <link rel="prefetch" href="/tag.pc.20b7a255353d7d112249.js">
+      
+    
+      
+        <link rel="prefetch" href="/post.mobile.832ed31c60acc2100948.js">
+      
+    
+      
+        <link rel="prefetch" href="/home.mobile.584efc04d6074715da6d.js">
+      
+    
+      
+        <link rel="prefetch" href="/tag.mobile.dfe526dc0cdccb80749d.js">
       
     
 
@@ -115,9 +127,22 @@ The upstream Linux kernel developers had decided that all models of Raspberry Pi
     <script src="https://cdn.bootcss.com/react/16.10.2/umd/react.production.min.js"></script>
     <script src="https://cdn.bootcss.com/react-dom/16.10.2/umd/react-dom.production.min.js"></script>
 
-    
-      <script src="/post.fa6538127f0557943635.js"></script>
-    
+    <script data-name='detect'>
+      var isMobile = window.navigator.userAgent.toLowerCase().indexOf('mobile') >= 0;
+      var isPC = !isMobile;
+
+      if (isPC) {
+        
+          document.write('<script src="/post.pc.f5c10667620e3fe4438d.js"><\/script>');
+        
+      }
+
+      if (isMobile) {
+        
+          document.write('<script src="/post.mobile.832ed31c60acc2100948.js"><\/script>');
+        
+      }
+    </script>
 
     
     <style> body > a { display: none; } </style>
