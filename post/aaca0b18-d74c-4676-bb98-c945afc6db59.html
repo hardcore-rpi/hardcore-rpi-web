@@ -1,0 +1,248 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    
+    <meta http-equiv="Expires" content="120" />
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    
+    
+      
+        <link rel="prefetch" href="/post.pc.7ef7f72007acfb1a6427.js">
+      
+    
+      
+        <link rel="prefetch" href="/home.pc.d4327ccacfb304b2b999.js">
+      
+    
+      
+        <link rel="prefetch" href="/tag.pc.17a48f9bffeca9553a68.js">
+      
+    
+      
+        <link rel="prefetch" href="/post.mobile.11d390eaabd59246fd17.js">
+      
+    
+      
+        <link rel="prefetch" href="/home.mobile.49b40e11c0053b70f6d3.js">
+      
+    
+      
+        <link rel="prefetch" href="/tag.mobile.72a2408570057544b012.js">
+      
+    
+
+    
+  <meta name="keywords" content="树莓派, raspberry pi, ARM, 单板机, 树莓派教程, 树莓派资料, Linux, 包管理">
+
+    
+  <meta name="description" content="硬核树莓派, 最硬核的树莓派研究分享, via: 理解树莓派软件源与_apt，一篇文章就够了，作者: JamHuang 本文由 硬核树莓派 原创编辑推出 引子 在 DIY 树莓派各种项目的时候，总要安装各种各样的软件包，一般执行 sudo apt-get install &amp;lt;package&amp;gt; 指令就可以完成安装。如果下载速度太慢，还可以 更换软件源 加速下载。 树莓派初学者通常到这里就结束了，但如果你想基于树莓派进一步学习 Linux 知识，成为树莓派高阶玩家，就非常有必要了解 apt-get 这条指令背后的原理，以及 Debian 系的包管理知识。 树莓派官方的 Raspbian 操作系统是 Debian 的衍生版，共用...">
+
+
+    <title>理解树莓派软件源与_apt，一篇文章就够了 - 硬核树莓派</title>
+
+    
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d2cc8aee7f6616b541ffcc6d5451ef03";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+  </head>
+  <body>
+    <div id='__root'>
+      <div style='display: none'>
+  <h1>理解树莓派软件源与_apt，一篇文章就够了</h1>
+
+  <article>
+    <p>via: <a href="https://hardcore-rpi.biko.pub/post/aaca0b18-d74c-4676-bb98-c945afc6db59.html">理解树莓派软件源与_apt，一篇文章就够了</a>，作者: <a href="https://www.zhihu.com/people/huang-wen-jian-31">JamHuang</a></p>
+<p>本文由 <a href="https://hardcore-rpi.biko.pub/">硬核树莓派</a> 原创编辑推出</p>
+<hr>
+<h1 id="引子">引子</h1>
+<p>在 DIY 树莓派各种项目的时候，总要安装各种各样的软件包，一般执行 <code>sudo apt-get install &lt;package&gt;</code> 指令就可以完成安装。如果下载速度太慢，还可以 <a href="https://hardcore-rpi.biko.pub/post/7f4c9c2e-1531-48d6-a220-11716f13df1a.html">更换软件源</a> 加速下载。</p>
+<p>树莓派初学者通常到这里就结束了，但如果你想基于树莓派进一步学习 Linux 知识，成为树莓派高阶玩家，就非常有必要了解 <code>apt-get</code> 这条指令背后的原理，以及 Debian 系的包管理知识。</p>
+<p>树莓派官方的 Raspbian 操作系统是 Debian 的衍生版，共用 Debian 的软件包管理机制，两者是相通的。</p>
+<blockquote>
+<p>起初 GNU/Linux 的世界中只有 .tar.gz。如果用户要使用一个软件，那就必须自己编译。当 Debian 诞生以后，一种能管理操作系统中已安装的软件包的系统显得很有必要，这个系统被命名为 dpkg。软件包一词在此第一次出现在 GNU/Linux。不久之后，红帽公司创建了他们自己的包管理系统 rpm。</p>
+</blockquote>
+<blockquote>
+<p>GNU/Linux 的创造者们很快又陷入了新的窘境。他们希望通过一种快捷、实用而且高效的方式来安装软件包，并能自动处理相互之间的依赖关系，还要在软件包升级过程中维护好配置文件。Debian 又一次充当了开路先锋的角色，首创了 APT（Advanced Packaging Tool，高级软件包管理工具）。这一工具后来被 Conectiva 移植到红帽公司的 rpm 包管理系统。在其他一些发行版中，我们也能看到 APT 的身影。</p>
+</blockquote>
+<h1 id="dpkg-debian-package">dpkg (Debian Package)</h1>
+<p>在 Linux 发展之初，安装软件的时候是需要下载以 tar.gz 结尾的软件源码包，然后对源码包进行编译安装。这是极其麻烦的使用。后来 Debian 开发了 dpkg(Debian Package) 管理工具来管理软件，软件都是以 deb 结尾的编译好的二进制包，通过 dpkg 命令可以安装软件和卸载软件。</p>
+<ul>
+<li><code>dpkg -i</code> - 安装软件包</li>
+<li><code>dpkg -r</code> - 移除软件包</li>
+<li><code>dpkg -l</code> - 查看某个软件包是否已经安装</li>
+<li><code>dpkg -L</code> - 查看某个软件包中都包含哪些文件</li>
+<li><code>dpkg --list</code> - 查看系统上安装的所有软件包和相关状态</li>
+</ul>
+<p>dpkg 是底层的包管理工具，不太常用，最常用的是 apt。</p>
+<h1 id="apt-advanced-packaging-tool">APT (Advanced Packaging Tool)</h1>
+<p>​dpkg 不够人性化的一点就是不能自动解决依赖问题，比如 A 软件包依赖于 B 软件包，那么你先得安装 B 才能安装 A。而且使用 dpkg 需要将软件下载到本地才能安装。使用 apt 安装软件时会自动从软件仓库下载软件进行安装，并且 apt 能自动解决依赖问题，当有依赖的时候它也会自动从软件仓库下载依赖的包进行安装。当然 apt 底层还是调用 dpkg 来进行软件安装的。</p>
+<p>apt相关文件</p>
+<ul>
+<li><code>/etc/apt/source.list</code> 配置软件包来源，也就是上面说的软件仓库</li>
+<li><code>/ect/apt/apt.conf.d</code> 存在apt的零碎配置文件</li>
+<li><code>/ect/apt/preferences</code> 制定软件包的版本参数</li>
+<li><code>/var/cache/apt/archives</code> 存放已下载的软件包</li>
+<li><code>/var/cache/apt/archives/partial</code> 存放正在下载的软件包</li>
+<li><code>/var/lib/apt/lists</code> 存放已下载的软件包详细信息</li>
+</ul>
+<p>树莓派的 APT 相关配置文件：</p>
+<p><img src="/media/15829029710738.jpg" alt="-w430"></p>
+<p><img src="/media/15829029961479.jpg" alt="-w441"></p>
+<p><img src="/media/15829031444509.jpg" alt="-w767"></p>
+<h1 id="软件源">软件源</h1>
+<p>软件源(软件仓库)中存放这大量的软件包，apt 会从软件源中下载软件。在 <code>/ect/apt/soure.list</code> 中可以为 apt 配置软件源。在这个文件中 deb 关键字定义已编译的软件包来源，deb-src 定义源码包的来源。每一行的格式如下：</p>
+<pre><code>deb(或deb-src) &lt;软件源地址&gt; &lt;主版本代号&gt; [软件仓库1] [软件仓库2] [软件仓库3] ...</code></pre><p>树莓派的软件仓库一般有四种限定词：</p>
+<ul>
+<li>main：官方支持的符合 DFSG 规范的软件</li>
+<li>contrib：带有非自由依赖关系的 DFSG 兼容软件</li>
+<li>non-free：非 DFSG 兼容软件</li>
+<li>firmware：官方固件，非开源</li>
+</ul>
+<blockquote>
+<p>DFSG 即 Debian Free Software Guidelines、自由软件指导方针，比如规定软件必须开源等。详细说明见： <a href="https://www.debian.org/social_contract.zh-cn.html">Debian 社群契约</a></p>
+</blockquote>
+<p>树莓派的默认软件源配置：</p>
+<pre><code>deb http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi
+deb-src http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi</code></pre><p>软件源里面有什么？如果你在浏览器上打开软件源 url <code>http://raspbian.raspberrypi.org/raspbian/</code>，会发现它其实是一个静态资源目录：</p>
+<p><img src="/media/15832456629632.jpg" alt="-w679"></p>
+<ul>
+<li>dists 目录包含 Raspbian 的各个发行版，既包括像 <code>buster</code> 一样的具体发行版本，也包括像 <code>stable</code>、<code>testing</code> 和 <code>unstable</code> 的代号</li>
+<li>pool 目录为软件包的下载地址。为了方便管理，pool 目录下会继续划分 main、contrib 和 non-free 等子目录。比如 python3 就位于 <code>pool/main/p/python3-defaults</code> 这个目录下。</li>
+</ul>
+<h1 id="apt-get-命令">apt-get 命令</h1>
+<p>apt-get 命令一般用于软件包的安装，更新和移除</p>
+<ul>
+<li><code>apt-get update</code> - 更新本地的软件源索引。在你更改了 Raspbian 的 <code>/etc/apt/sources.list</code> 或 <code>/etc/apt/preferences</code> 后，需要运行这个命令让改动生效。最好能定期运行该命令，以确保软件源索引是最新的。</li>
+<li><code>apt-get upgrade</code> - 更新所有已安装的软件包</li>
+<li><code>apt-get install</code> - 安装软件包</li>
+<li><code>apt-get reinstall</code> - 重装软件包</li>
+<li><code>apt-get remove</code> - 删除已安装的软件包（保留配置文件）</li>
+<li><code>apt-get purge</code>- 删除已安装包，同时删除配置文件</li>
+<li><code>apt-get autoremove</code> - 删除未使用的安装包</li>
+<li><code>apt-get dist-upgrade</code> - 更新整个系统到最新的发行版，相当于升级 Raspbian 系统</li>
+<li><code>apt-get clean</code> - 删除本地所有的 deb 包（不会删除软件）</li>
+<li><code>apt-get autoclean</code> - 删除本地已经安装过的 deb 包</li>
+<li><code>apt-get check</code> - 检查是否存在未安装的软件包依赖</li>
+<li><code>apt-get source</code> - 下载 deb 源码包到本地</li>
+<li><code>apt-get download</code> - 下载 deb 包到本地</li>
+<li><code>apt-get changelog</code>- 打印软件包的版本变更日志</li>
+</ul>
+<h1 id="apt-cache-命令">apt-cache 命令</h1>
+<p>apt-cache 一般用于软件包查找和显示软件包信息。</p>
+<ul>
+<li><code>apt-cache search</code> - 搜索软件包。当你不知道软件包全名的时候，可以用这个指令搜索关键词</li>
+<li><code>apt-cache depends</code> - 打印软件包的依赖包信息</li>
+<li><code>apt-cache rdepends</code> - 打印依赖这个包的软件包信息（反向依赖）</li>
+</ul>
+<h1 id="常用命令组合">常用命令组合</h1>
+<h2 id="查看系统上安装的软件包">查看系统上安装的软件包</h2>
+<p>查看系统上安装的所有软件包和相关状态，执行 </p>
+<pre><code class="language-bash">dpkg --list</code></pre>
+<p>输出每个软件包的一行简单介绍，2 字符的状态标志，包名，所安装版本和简要描述。</p>
+<p><img src="/media/15831620188825.jpg" alt="-w1026"></p>
+<p>如果要过滤包名，比如只显示 python 开头的包，执行</p>
+<pre><code class="language-bash">dpkg --list python*</code></pre>
+<p>要获取软件包的更详细信息，比如 python3，执行:</p>
+<pre><code class="language-bash">dpkg --status python3</code></pre>
+<p>输出状态、版本号、依赖包等信息。</p>
+<p><img src="/media/15831621739249.jpg" alt="-w1026"></p>
+<h2 id="列出软件包包含的文件">列出软件包包含的文件</h2>
+<p>要找出一个软件包包含的所有文件，比如找出 rclone 安装过程中生成了哪些文件，执行：</p>
+<pre><code class="language-bash">dpkg --listfiles rclone</code></pre>
+<p><img src="/media/15831632195057.jpg" alt="-w1026"></p>
+<blockquote>
+<p>rclone 一是款文件同步工具，支持本地文件和 Microsoft OneDrive，Amazon Cloud Drive，Dropbox，FTP，SSH/SFTP 等多种云存储同步 —— <a href="https://hardcore-rpi.biko.pub/post/893a14e7-ddf1-497c-b067-ef066a85ada4.html">如何在树莓派上免费获取 GB 级存储空间 - 硬核树莓派</a></p>
+</blockquote>
+<p>也可以直接查看 deb 包内的文件，执行：</p>
+<pre><code class="language-bash">dpkg-deb --contents rclone_1.45-3_armhf.deb</code></pre>
+<p><img src="/media/15832443790563.jpg" alt="-w1026"></p>
+<p>还可以把 deb 包内的文件解压到当前的 temp 目录（这不是安装，而是在本地目录测试包内容的简单方法），执行：</p>
+<pre><code class="language-bash">dpkg-deb --extract rclone_1.45-3_armhf.deb temp</code></pre>
+<p>但如果你只想知道某个文件是哪个软件包生成的，执行：</p>
+<pre><code class="language-bash">dpkg --search rclone</code></pre>
+<p><img src="/media/15831631921867.jpg" alt="-w1026"></p>
+<h1 id="其他常用命令">其他常用命令</h1>
+<p>Raspbian 不一定默认带有下面这些命令。如果没有的话，<code>apt-get install</code> 安装即可。</p>
+<ul>
+<li><code>apt-show-versions</code> - 打印系统中所有已安装的包的当前版本和可升级版本</li>
+<li><code>apt-config</code> - apt 的配置工具</li>
+<li><code>tasksel</code> - 用于安装软件集，例如一键安装 gnome 桌面、xfce 桌面等等。<code>--list-tasks</code> 参数可以列出所有支持的软件集。</li>
+<li><code>dselect</code> - 包管理系统的图形菜单界面，对第一次安装和大范围升级特别有用</li>
+<li><code>dpkg-deb</code> - 用于操作 deb 文件，比如探查包内文件等</li>
+<li><code>dpkg-split</code> - 大软件包分割工具，例如把一个大 deb 分割成 N 部分，每部分 460KB</li>
+</ul>
+<h1 id="参考资料">参考资料</h1>
+<ul>
+<li><a href="https://wiki.ubuntu.org.cn/UbuntuHelp:AptGet/Howto/zh">UbuntuHelp:AptGet/Howto/zh - Ubuntu中文</a></li>
+<li><a href="https://www.debian.org/doc/manuals/apt-howto/index.zh-cn.html">APT HOWTO (Obsolete Documentation)</a></li>
+<li><a href="https://www.cnblogs.com/xidongyu/p/7801897.html">Ubuntu软件包管理器 - 被罚站的树 - 博客园</a></li>
+<li><a href="https://salsa.debian.org/debian/packaging-tutorial">Debian / packaging-tutorial · GitLab</a></li>
+<li><a href="https://www.debian.org/doc/manuals/debian-faq/ch-pkg_basics.zh-cn.html">The Debian GNU/Linux FAQ - Debian 的包管理系统</a></li>
+<li><a href="https://www.debian.org/doc/manuals/debian-faq/ch-ftparchives.zh-cn.html">The Debian GNU/Linux FAQ - Debian 的 FTP</a></li>
+<li><a href="https://unix.stackexchange.com/questions/509915/what-is-the-difference-between-contrib-and-non-free-packages-repositories">debian - What is the difference between &#39;contrib&#39; and &#39;non-free&#39; packages repositories? - Unix &amp; Linux Stack Exchange</a></li>
+<li><a href="https://www.debian.org/doc/debian-policy/ch-archive#s-contrib">2. The Debian Archive — Debian Policy Manual v4.5.0.0</a></li>
+<li><a href="https://www.debian.org/social_contract.zh-cn.html">Debian 社群契约</a></li>
+<li><a href="https://www.debian.org/doc/manuals/debian-reference/ch02.zh-cn.html">第 2 章 Debian 软件包管理</a></li>
+</ul>
+<hr>
+<ul>
+<li>网站：<a href="https://hardcore-rpi.biko.pub/">https://hardcore-rpi.biko.pub/</a></li>
+<li>知乎专栏：<a href="https://zhuanlan.zhihu.com/hardcore-rpi">https://zhuanlan.zhihu.com/hardcore-rpi</a></li>
+<li>GitHub: <a href="https://github.com/hardcore-rpi">https://github.com/hardcore-rpi</a></li>
+<li>公众号: <a href="https://hardcore-rpi.biko.pub/wx.html">https://hardcore-rpi.biko.pub/wx.html</a></li>
+<li>头条号: <a href="https://www.toutiao.com/c/user/1257451073577822/#mid=1659320797449220">https://www.toutiao.com/c/user/1257451073577822/#mid=1659320797449220</a></li>
+</ul>
+<p><img src="https://hardcore-rpi.biko.pub/media/qrcode.png" alt="公众号"></p>
+
+  </article>
+</div>
+    </div>
+
+    <script>
+      window.context = {"site":{"post":{"list":["/post/aaca0b18-d74c-4676-bb98-c945afc6db59.html","/post/893a14e7-ddf1-497c-b067-ef066a85ada4.html","/post/fc7a533d-4dc3-4952-a8d4-a558551bad5c.html","/post/41c047b2-8f9d-4364-868c-282170e22712.html","/post/44e488f6-e1e2-4d94-b6f8-522c477dabce.html","/post/a3e0b3ce-da21-48ad-8980-bfc93b15e3da.html","/post/7c60884e-2533-4090-9a05-ded33fc455ea.html","/post/701f597c-2ae4-453d-970f-506ef7271a93.html","/post/b2ae81d9-f111-4c2d-ab7a-52c4c33ccb45.html","/post/f3e683de-1c19-4b20-8cd3-0737edec48d3.html","/post/987bf675-f9ce-4a3a-9a8c-46940eee6981.html","/post/f13bd0ef-a754-4e12-9a6a-3b60b5a4036d.html","/post/8c8d5b17-f413-49c8-99b3-54b42460e918.html","/post/c6bd8c4c-6b42-429d-9d45-c5430f718996.html","/post/a356a857-d4e0-4d1b-b279-99b41c9e12e7.html","/post/c6717517-cd43-4c06-9d90-9130fbf64f22.html","/post/f4b5ee10-c3ba-4cab-8090-92bc50efa6fc.html","/post/eda0226e-c61b-457b-887f-70eefcc97678.html","/post/f8a10f97-af94-4d38-aed7-1b64f01fa7d1.html","/post/1fa95c32-a39a-432f-ab9c-7612cdb2427a.html","/post/7f4c9c2e-1531-48d6-a220-11716f13df1a.html","/post/defbb675-a0cd-4fc0-8cc8-d4c9144a7da2.html"],"tags":{"包管理":["/post/aaca0b18-d74c-4676-bb98-c945afc6db59.html"],"存储":["/post/893a14e7-ddf1-497c-b067-ef066a85ada4.html"],"内网穿透":["/post/fc7a533d-4dc3-4952-a8d4-a558551bad5c.html","/post/44e488f6-e1e2-4d94-b6f8-522c477dabce.html"],"ngrok":["/post/fc7a533d-4dc3-4952-a8d4-a558551bad5c.html"],"查看型号":["/post/41c047b2-8f9d-4364-868c-282170e22712.html","/post/701f597c-2ae4-453d-970f-506ef7271a93.html"],"远程控制":["/post/a3e0b3ce-da21-48ad-8980-bfc93b15e3da.html"],"webmin":["/post/a3e0b3ce-da21-48ad-8980-bfc93b15e3da.html"],"GPIO":["/post/7c60884e-2533-4090-9a05-ded33fc455ea.html"],"远程桌面":["/post/f3e683de-1c19-4b20-8cd3-0737edec48d3.html","/post/987bf675-f9ce-4a3a-9a8c-46940eee6981.html","/post/eda0226e-c61b-457b-887f-70eefcc97678.html"],"外网登录":["/post/f3e683de-1c19-4b20-8cd3-0737edec48d3.html"],"互传文件":["/post/987bf675-f9ce-4a3a-9a8c-46940eee6981.html"],"操作系统":["/post/f13bd0ef-a754-4e12-9a6a-3b60b5a4036d.html"],"WiFi":["/post/8c8d5b17-f413-49c8-99b3-54b42460e918.html","/post/1fa95c32-a39a-432f-ab9c-7612cdb2427a.html"],"无线热点":["/post/8c8d5b17-f413-49c8-99b3-54b42460e918.html","/post/c6bd8c4c-6b42-429d-9d45-c5430f718996.html"],"软路由":["/post/8c8d5b17-f413-49c8-99b3-54b42460e918.html","/post/c6bd8c4c-6b42-429d-9d45-c5430f718996.html"],"openwrt":["/post/c6bd8c4c-6b42-429d-9d45-c5430f718996.html"],"资料":["/post/a356a857-d4e0-4d1b-b279-99b41c9e12e7.html"],"Arduino":["/post/c6717517-cd43-4c06-9d90-9130fbf64f22.html"],"安装":["/post/f4b5ee10-c3ba-4cab-8090-92bc50efa6fc.html"],"启动":["/post/f4b5ee10-c3ba-4cab-8090-92bc50efa6fc.html"],"家庭影院":["/post/f8a10f97-af94-4d38-aed7-1b64f01fa7d1.html"],"kodi":["/post/f8a10f97-af94-4d38-aed7-1b64f01fa7d1.html"],"SSH":["/post/1fa95c32-a39a-432f-ab9c-7612cdb2427a.html"],"软件源":["/post/7f4c9c2e-1531-48d6-a220-11716f13df1a.html"],"显示屏":["/post/defbb675-a0cd-4fc0-8cc8-d4c9144a7da2.html"],"分辨率":["/post/defbb675-a0cd-4fc0-8cc8-d4c9144a7da2.html"]},"map":{"/post/aaca0b18-d74c-4676-bb98-c945afc6db59.html":{"title":"理解树莓派软件源与_apt，一篇文章就够了","createDate":"2020-02-28 08:00:00","updateDate":"2020-02-28 08:00:00","tags":["包管理"],"categories":["系统开发"],"originMeta":{"id":"aaca0b18-d74c-4676-bb98-c945afc6db59","createDate":"2020-02-28T00:00:00.000Z","categories":["系统开发"],"tags":["包管理"]},"summary":"via: 理解树莓派软件源与_apt，一篇文章就够了，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n引子\n在 DIY 树莓派各种项目的时候，总要安装各种各样的软件包，一般执行 s..."},"/wx.html":{"title":"微信公众号","createDate":"2020-02-26 23:59:24","updateDate":"2020-02-26 23:56:48","tags":[],"categories":[],"originMeta":{"title":"微信公众号"},"summary":"\n"},"/post/893a14e7-ddf1-497c-b067-ef066a85ada4.html":{"title":"如何在树莓派上免费获取 GB 级存储空间","createDate":"2020-02-26 08:00:00","updateDate":"2020-02-26 08:00:00","tags":["存储"],"categories":["实用技巧"],"originMeta":{"id":"893a14e7-ddf1-497c-b067-ef066a85ada4","title":"如何在树莓派上免费获取 GB 级存储空间","categories":"实用技巧","createDate":"2020-02-26T00:00:00.000Z","tags":["存储"]},"summary":"via: 如何在树莓派上免费获取 GB 级存储空间，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n树莓派使用 SD 卡作为磁盘。如果想扩展存储空间，可以换更大的 SD 卡，或者 ..."},"/about.html":{"title":"关于","createDate":"2020-02-23 23:04:42","updateDate":"2020-02-23 23:04:42","tags":[],"categories":[],"originMeta":{"title":"关于"},"summary":"最硬核的树莓派研究分享\n\n网站：https://hardcore-rpi.biko.pub/\n知乎专栏：https://zhuanlan.zhihu.com/hardcore-rpi\nGitHu..."},"/post/fc7a533d-4dc3-4952-a8d4-a558551bad5c.html":{"title":"从零开始：树莓派_ngrok_内网穿透","createDate":"2020-02-23 08:00:00","updateDate":"2020-02-23 08:00:00","tags":["内网穿透","ngrok"],"categories":["高级项目"],"originMeta":{"id":"fc7a533d-4dc3-4952-a8d4-a558551bad5c","createDate":"2020-02-23T00:00:00.000Z","categories":"高级项目","tags":["内网穿透","ngrok"]},"summary":"via: 从零开始：树莓派_ngrok_内网穿透，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n没有公网 IP 的树莓派玩家如果想在公司或其他地方访问到家里的树莓派，需要借助 内..."},"/post/41c047b2-8f9d-4364-868c-282170e22712.html":{"title":"命令行生成树莓派系统信息截图","createDate":"2020-02-23 08:00:00","updateDate":"2020-02-23 08:00:00","tags":["查看型号"],"categories":["实用技巧"],"originMeta":{"id":"41c047b2-8f9d-4364-868c-282170e22712","createDate":"2020-02-23T00:00:00.000Z","categories":"实用技巧","tags":["查看型号"]},"summary":"via: 命令行生成树莓派系统信息截图，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n通常，我们可以执行 cat /proc/cpuinfo、lscpu、free 和 uname..."},"/post/44e488f6-e1e2-4d94-b6f8-522c477dabce.html":{"title":"树莓派内网穿透方法大全","createDate":"2020-02-18 08:00:00","updateDate":"2020-02-18 08:00:00","tags":["内网穿透"],"categories":["高级项目"],"originMeta":{"id":"44e488f6-e1e2-4d94-b6f8-522c477dabce","createDate":"2020-02-18T00:00:00.000Z","categories":"高级项目","tags":["内网穿透"]},"summary":"via: 树莓派内网穿透方法大全，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n\n在用树莓派搭建自有服务的过程中，比如 NAS，经常会遇到 内网穿透 这个词。通俗而言，就是让你能..."},"/post/a3e0b3ce-da21-48ad-8980-bfc93b15e3da.html":{"title":"教你用_webmin_在线管理树莓派系统","createDate":"2020-02-14 08:00:00","updateDate":"2020-02-14 08:00:00","tags":["远程控制","webmin"],"categories":["实用技巧"],"originMeta":{"id":"a3e0b3ce-da21-48ad-8980-bfc93b15e3da","createDate":"2020-02-14T00:00:00.000Z","categories":"实用技巧","tags":["远程控制","webmin"]},"summary":"via: 教你用_webmin_在线管理树莓派系统，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n树莓派官方有大名鼎鼎的 Raspbian 操作系统，有着和 PC 桌面类似的操作..."},"/post/7c60884e-2533-4090-9a05-ded33fc455ea.html":{"title":"初识树莓派 GPIO","createDate":"2020-02-11 08:00:00","updateDate":"2020-02-11 08:00:00","tags":["GPIO"],"categories":["高级项目"],"originMeta":{"id":"7c60884e-2533-4090-9a05-ded33fc455ea","title":"初识树莓派 GPIO","createDate":"2020-02-11T00:00:00.000Z","categories":"高级项目","tags":["GPIO"]},"summary":"via: 初识树莓派 GPIO，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n在一般单片机平台上，控制 GPIO 口是非常容易的。在代码中配置相应的 GPIO 寄存器，即可全权控..."},"/post/701f597c-2ae4-453d-970f-506ef7271a93.html":{"title":"树莓派查看型号的小技巧","createDate":"2020-02-11 08:00:00","updateDate":"2020-02-11 08:00:00","tags":["查看型号"],"categories":["实用技巧"],"originMeta":{"id":"701f597c-2ae4-453d-970f-506ef7271a93","createDate":"2020-02-11T00:00:00.000Z","categories":"实用技巧","tags":["查看型号"]},"summary":"via: 树莓派查看型号的小技巧，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n树莓派是一款来源于英国慈善组织“Raspberry Pi 基金会”的卡片电脑，至今已经发行在售了 ..."},"/post/b2ae81d9-f111-4c2d-ab7a-52c4c33ccb45.html":{"title":"树莓派 Linux 操作系统大全","createDate":"2020-02-05 08:00:00","updateDate":"2020-02-05 08:00:00","tags":[],"categories":["系统开发","发行版"],"originMeta":{"id":"b2ae81d9-f111-4c2d-ab7a-52c4c33ccb45","title":"树莓派 Linux 操作系统大全","createDate":"2020-02-05T00:00:00.000Z","categories":["系统开发","发行版"]},"summary":"via: 树莓派 Linux 操作系统大全，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n树莓派是 ARM 架构的卡片电脑，可以安装非常多的 Linux 发行版。而且它太流行了，..."},"/post/f3e683de-1c19-4b20-8cd3-0737edec48d3.html":{"title":"教你外网登录树莓派远程桌面","createDate":"2020-01-28 08:00:00","updateDate":"2020-01-28 08:00:00","tags":["远程桌面","外网登录"],"categories":["进阶项目"],"originMeta":{"id":"f3e683de-1c19-4b20-8cd3-0737edec48d3","title":"教你外网登录树莓派远程桌面","createDate":"2020-01-28T00:00:00.000Z","categories":"进阶项目","tags":["远程桌面","外网登录"]},"summary":"via: 教你外网登录树莓派远程桌面，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n在上期的教你从零开始连接树莓派远程桌面中，介绍了如何在同一局域网下登录树莓派远程桌面。但如果你..."},"/post/987bf675-f9ce-4a3a-9a8c-46940eee6981.html":{"title":"教你用树莓派远程桌面和电脑互传文件","createDate":"2020-01-28 08:00:00","updateDate":"2020-01-28 08:00:00","tags":["远程桌面","互传文件"],"categories":["进阶项目"],"originMeta":{"id":"987bf675-f9ce-4a3a-9a8c-46940eee6981","title":"教你用树莓派远程桌面和电脑互传文件","createDate":"2020-01-28T00:00:00.000Z","categories":"进阶项目","tags":["远程桌面","互传文件"]},"summary":"via: 教你用树莓派远程桌面和电脑互传文件，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n用远程桌面（VNC）登录树莓派后，可以像操作自己的电脑一样，用电脑的鼠标键盘显示器来玩..."},"/post/f13bd0ef-a754-4e12-9a6a-3b60b5a4036d.html":{"title":"无树莓派硬件体验：虚拟机安装 Raspberry Pi Desktop 操作系统","createDate":"2020-01-21 08:00:00","updateDate":"2020-01-21 08:00:00","tags":["操作系统"],"categories":["实用技巧"],"originMeta":{"id":"f13bd0ef-a754-4e12-9a6a-3b60b5a4036d","title":"无树莓派硬件体验：虚拟机安装 Raspberry Pi Desktop 操作系统","createDate":"2020-01-21T00:00:00.000Z","categories":"实用技巧","tags":["操作系统"]},"summary":"via: 无树莓派硬件体验：虚拟机安装 Raspberry Pi Desktop 操作系统，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n树莓派官方的 raspbian 操作系统..."},"/post/8c8d5b17-f413-49c8-99b3-54b42460e918.html":{"title":"从零开始：树莓派共享 WiFi 秒变无线热点（树莓派路由器","createDate":"2020-01-13 08:00:00","updateDate":"2020-01-13 08:00:00","tags":["WiFi","无线热点","软路由"],"categories":["高级项目"],"originMeta":{"id":"8c8d5b17-f413-49c8-99b3-54b42460e918","title":"从零开始：树莓派共享 WiFi 秒变无线热点（树莓派路由器","createDate":"2020-01-13T00:00:00.000Z","categories":"高级项目","tags":["WiFi","无线热点","软路由"]},"summary":"via: 从零开始：树莓派共享 WiFi 秒变无线热点（树莓派路由器，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n概述\n树莓派是一款来源于英国慈善组织“Raspberry Pi..."},"/post/c6bd8c4c-6b42-429d-9d45-c5430f718996.html":{"title":"树莓派软路由 OpenWrt 简介","createDate":"2020-01-04 08:00:00","updateDate":"2020-01-04 08:00:00","tags":["软路由","无线热点","openwrt"],"categories":["高级项目"],"originMeta":{"id":"c6bd8c4c-6b42-429d-9d45-c5430f718996","title":"树莓派软路由 OpenWrt 简介","createDate":"2020-01-04T00:00:00.000Z","categories":"高级项目","tags":["软路由","无线热点","openwrt"]},"summary":"via: 树莓派软路由 OpenWrt 简介，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n\n用树莓派 DIY 软路由的时候，总会说到 OpenWrt 这个开源 Linux 发行..."},"/post/a356a857-d4e0-4d1b-b279-99b41c9e12e7.html":{"title":"树莓派 4B 详细资料","createDate":"2019-12-18 08:00:00","updateDate":"2019-12-18 08:00:00","tags":["资料"],"categories":["概述"],"originMeta":{"id":"a356a857-d4e0-4d1b-b279-99b41c9e12e7","createDate":"2019-12-18T00:00:00.000Z","title":"树莓派 4B 详细资料","categories":"概述","tags":["资料"]},"summary":"via: 树莓派 4B 详细资料，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n\n\n\n核心\nCPU：Broadcom BCM2711，1.5 GHz，64-bit，4核心，ARM..."},"/post/c6717517-cd43-4c06-9d90-9130fbf64f22.html":{"title":"树莓派 VS Arduino，哪个才是你的菜","createDate":"2019-12-18 08:00:00","updateDate":"2019-12-18 08:00:00","tags":["Arduino"],"categories":["概述"],"originMeta":{"id":"c6717517-cd43-4c06-9d90-9130fbf64f22","title":"树莓派 VS Arduino，哪个才是你的菜","createDate":"2019-12-18T00:00:00.000Z","categories":"概述","tags":["Arduino"]},"summary":"via: 树莓派 VS Arduino，哪个才是你的菜，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n说到树莓派，很多人喜欢把它和 Arduino 对比：前者性能高但软件结构复杂..."},"/post/f4b5ee10-c3ba-4cab-8090-92bc50efa6fc.html":{"title":"树莓派 4B 安装和启动","createDate":"2019-12-18 08:00:00","updateDate":"2019-12-18 08:00:00","tags":["安装","启动"],"categories":["入门","系统安装与启动"],"originMeta":{"id":"f4b5ee10-c3ba-4cab-8090-92bc50efa6fc","createDate":"2019-12-18T00:00:00.000Z","title":"树莓派 4B 安装和启动","categories":["入门","系统安装与启动"],"tags":["安装","启动"]},"summary":"via: 树莓派 4B 安装和启动，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n树莓派 4B 是一款来源于英国慈善组织“Raspberry Pi 基金会”，发布于 2019年6..."},"/post/eda0226e-c61b-457b-887f-70eefcc97678.html":{"title":"从零开始：连接树莓派远程桌面","createDate":"2019-12-18 08:00:00","updateDate":"2019-12-18 08:00:00","tags":["远程桌面"],"categories":["进阶项目"],"originMeta":{"id":"eda0226e-c61b-457b-887f-70eefcc97678","title":"从零开始：连接树莓派远程桌面","createDate":"2019-12-18T00:00:00.000Z","categories":"进阶项目","tags":["远程桌面"]},"summary":"via: 从零开始：连接树莓派远程桌面，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n树莓派是信用卡大小的卡片电脑，自带 HDMI 接口、网线接口、USB 接口和 WiFi。\n玩..."},"/post/f8a10f97-af94-4d38-aed7-1b64f01fa7d1.html":{"title":"树莓派投屏秒变家庭影院（安装 kodi）","createDate":"2019-12-18 08:00:00","updateDate":"2019-12-18 08:00:00","tags":["家庭影院","kodi"],"categories":["进阶项目"],"originMeta":{"id":"f8a10f97-af94-4d38-aed7-1b64f01fa7d1","title":"树莓派投屏秒变家庭影院（安装 kodi）","createDate":"2019-12-18T00:00:00.000Z","categories":"进阶项目","tags":["家庭影院","kodi"]},"summary":"via: 树莓派投屏秒变家庭影院（安装 kodi），作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n在上一期的 树莓派更换软件源 中，我给大家介绍了如何更换软件源，以便更快速地安装..."},"/post/1fa95c32-a39a-432f-ab9c-7612cdb2427a.html":{"title":"从零开始：无屏幕和键盘配置树莓派 WiFi 和 SSH","createDate":"2019-12-18 08:00:00","updateDate":"2019-12-18 08:00:00","tags":["WiFi","SSH"],"categories":["实用技巧"],"originMeta":{"id":"1fa95c32-a39a-432f-ab9c-7612cdb2427a","title":"从零开始：无屏幕和键盘配置树莓派 WiFi 和 SSH","createDate":"2019-12-18T00:00:00.000Z","categories":"实用技巧","tags":["WiFi","SSH"]},"summary":"via: 从零开始：无屏幕和键盘配置树莓派 WiFi 和 SSH，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n树莓派的很多 DIY 玩法都要求联网和 ssh 登录，但这对于没有..."},"/post/7f4c9c2e-1531-48d6-a220-11716f13df1a.html":{"title":"树莓派更换软件源","createDate":"2019-12-18 08:00:00","updateDate":"2019-12-18 08:00:00","tags":["软件源"],"categories":["实用技巧"],"originMeta":{"id":"7f4c9c2e-1531-48d6-a220-11716f13df1a","createDate":"2019-12-18T00:00:00.000Z","title":"树莓派更换软件源","categories":"实用技巧","tags":["软件源"]},"summary":"via: 树莓派更换软件源，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n在开始树莓派的各种 DIY 之前，我们还需要做一件很重要的事情：更换软件源。\n这里我简单解释下什么是软件..."},"/post/defbb675-a0cd-4fc0-8cc8-d4c9144a7da2.html":{"title":"树莓派调节显示屏分辨率","createDate":"2019-12-18 08:00:00","updateDate":"2019-12-18 08:00:00","tags":["显示屏","分辨率"],"categories":["实用技巧"],"originMeta":{"id":"defbb675-a0cd-4fc0-8cc8-d4c9144a7da2","title":"树莓派调节显示屏分辨率","createDate":"2019-12-18T00:00:00.000Z","categories":"实用技巧","tags":["显示屏","分辨率"]},"summary":"via: 树莓派调节显示屏分辨率，作者: JamHuang\n本文由 硬核树莓派 原创编辑推出\n\n虽然连接上显示器后，树莓派会根据显示器配置自动调节分辨率，但如果调节得不好，或者其他原因，我们就要..."}}}},"page":{"title":"理解树莓派软件源与_apt，一篇文章就够了","content":"<p>via: <a href=\"https://hardcore-rpi.biko.pub/post/aaca0b18-d74c-4676-bb98-c945afc6db59.html\">理解树莓派软件源与_apt，一篇文章就够了</a>，作者: <a href=\"https://www.zhihu.com/people/huang-wen-jian-31\">JamHuang</a></p>\n<p>本文由 <a href=\"https://hardcore-rpi.biko.pub/\">硬核树莓派</a> 原创编辑推出</p>\n<hr>\n<h1 id=\"引子\">引子</h1>\n<p>在 DIY 树莓派各种项目的时候，总要安装各种各样的软件包，一般执行 <code>sudo apt-get install &lt;package&gt;</code> 指令就可以完成安装。如果下载速度太慢，还可以 <a href=\"https://hardcore-rpi.biko.pub/post/7f4c9c2e-1531-48d6-a220-11716f13df1a.html\">更换软件源</a> 加速下载。</p>\n<p>树莓派初学者通常到这里就结束了，但如果你想基于树莓派进一步学习 Linux 知识，成为树莓派高阶玩家，就非常有必要了解 <code>apt-get</code> 这条指令背后的原理，以及 Debian 系的包管理知识。</p>\n<p>树莓派官方的 Raspbian 操作系统是 Debian 的衍生版，共用 Debian 的软件包管理机制，两者是相通的。</p>\n<blockquote>\n<p>起初 GNU/Linux 的世界中只有 .tar.gz。如果用户要使用一个软件，那就必须自己编译。当 Debian 诞生以后，一种能管理操作系统中已安装的软件包的系统显得很有必要，这个系统被命名为 dpkg。软件包一词在此第一次出现在 GNU/Linux。不久之后，红帽公司创建了他们自己的包管理系统 rpm。</p>\n</blockquote>\n<blockquote>\n<p>GNU/Linux 的创造者们很快又陷入了新的窘境。他们希望通过一种快捷、实用而且高效的方式来安装软件包，并能自动处理相互之间的依赖关系，还要在软件包升级过程中维护好配置文件。Debian 又一次充当了开路先锋的角色，首创了 APT（Advanced Packaging Tool，高级软件包管理工具）。这一工具后来被 Conectiva 移植到红帽公司的 rpm 包管理系统。在其他一些发行版中，我们也能看到 APT 的身影。</p>\n</blockquote>\n<h1 id=\"dpkg-debian-package\">dpkg (Debian Package)</h1>\n<p>在 Linux 发展之初，安装软件的时候是需要下载以 tar.gz 结尾的软件源码包，然后对源码包进行编译安装。这是极其麻烦的使用。后来 Debian 开发了 dpkg(Debian Package) 管理工具来管理软件，软件都是以 deb 结尾的编译好的二进制包，通过 dpkg 命令可以安装软件和卸载软件。</p>\n<ul>\n<li><code>dpkg -i</code> - 安装软件包</li>\n<li><code>dpkg -r</code> - 移除软件包</li>\n<li><code>dpkg -l</code> - 查看某个软件包是否已经安装</li>\n<li><code>dpkg -L</code> - 查看某个软件包中都包含哪些文件</li>\n<li><code>dpkg --list</code> - 查看系统上安装的所有软件包和相关状态</li>\n</ul>\n<p>dpkg 是底层的包管理工具，不太常用，最常用的是 apt。</p>\n<h1 id=\"apt-advanced-packaging-tool\">APT (Advanced Packaging Tool)</h1>\n<p>​dpkg 不够人性化的一点就是不能自动解决依赖问题，比如 A 软件包依赖于 B 软件包，那么你先得安装 B 才能安装 A。而且使用 dpkg 需要将软件下载到本地才能安装。使用 apt 安装软件时会自动从软件仓库下载软件进行安装，并且 apt 能自动解决依赖问题，当有依赖的时候它也会自动从软件仓库下载依赖的包进行安装。当然 apt 底层还是调用 dpkg 来进行软件安装的。</p>\n<p>apt相关文件</p>\n<ul>\n<li><code>/etc/apt/source.list</code> 配置软件包来源，也就是上面说的软件仓库</li>\n<li><code>/ect/apt/apt.conf.d</code> 存在apt的零碎配置文件</li>\n<li><code>/ect/apt/preferences</code> 制定软件包的版本参数</li>\n<li><code>/var/cache/apt/archives</code> 存放已下载的软件包</li>\n<li><code>/var/cache/apt/archives/partial</code> 存放正在下载的软件包</li>\n<li><code>/var/lib/apt/lists</code> 存放已下载的软件包详细信息</li>\n</ul>\n<p>树莓派的 APT 相关配置文件：</p>\n<p><img src=\"/media/15829029710738.jpg\" alt=\"-w430\"></p>\n<p><img src=\"/media/15829029961479.jpg\" alt=\"-w441\"></p>\n<p><img src=\"/media/15829031444509.jpg\" alt=\"-w767\"></p>\n<h1 id=\"软件源\">软件源</h1>\n<p>软件源(软件仓库)中存放这大量的软件包，apt 会从软件源中下载软件。在 <code>/ect/apt/soure.list</code> 中可以为 apt 配置软件源。在这个文件中 deb 关键字定义已编译的软件包来源，deb-src 定义源码包的来源。每一行的格式如下：</p>\n<pre><code>deb(或deb-src) &lt;软件源地址&gt; &lt;主版本代号&gt; [软件仓库1] [软件仓库2] [软件仓库3] ...</code></pre><p>树莓派的软件仓库一般有四种限定词：</p>\n<ul>\n<li>main：官方支持的符合 DFSG 规范的软件</li>\n<li>contrib：带有非自由依赖关系的 DFSG 兼容软件</li>\n<li>non-free：非 DFSG 兼容软件</li>\n<li>firmware：官方固件，非开源</li>\n</ul>\n<blockquote>\n<p>DFSG 即 Debian Free Software Guidelines、自由软件指导方针，比如规定软件必须开源等。详细说明见： <a href=\"https://www.debian.org/social_contract.zh-cn.html\">Debian 社群契约</a></p>\n</blockquote>\n<p>树莓派的默认软件源配置：</p>\n<pre><code>deb http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi\ndeb-src http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi</code></pre><p>软件源里面有什么？如果你在浏览器上打开软件源 url <code>http://raspbian.raspberrypi.org/raspbian/</code>，会发现它其实是一个静态资源目录：</p>\n<p><img src=\"/media/15832456629632.jpg\" alt=\"-w679\"></p>\n<ul>\n<li>dists 目录包含 Raspbian 的各个发行版，既包括像 <code>buster</code> 一样的具体发行版本，也包括像 <code>stable</code>、<code>testing</code> 和 <code>unstable</code> 的代号</li>\n<li>pool 目录为软件包的下载地址。为了方便管理，pool 目录下会继续划分 main、contrib 和 non-free 等子目录。比如 python3 就位于 <code>pool/main/p/python3-defaults</code> 这个目录下。</li>\n</ul>\n<h1 id=\"apt-get-命令\">apt-get 命令</h1>\n<p>apt-get 命令一般用于软件包的安装，更新和移除</p>\n<ul>\n<li><code>apt-get update</code> - 更新本地的软件源索引。在你更改了 Raspbian 的 <code>/etc/apt/sources.list</code> 或 <code>/etc/apt/preferences</code> 后，需要运行这个命令让改动生效。最好能定期运行该命令，以确保软件源索引是最新的。</li>\n<li><code>apt-get upgrade</code> - 更新所有已安装的软件包</li>\n<li><code>apt-get install</code> - 安装软件包</li>\n<li><code>apt-get reinstall</code> - 重装软件包</li>\n<li><code>apt-get remove</code> - 删除已安装的软件包（保留配置文件）</li>\n<li><code>apt-get purge</code>- 删除已安装包，同时删除配置文件</li>\n<li><code>apt-get autoremove</code> - 删除未使用的安装包</li>\n<li><code>apt-get dist-upgrade</code> - 更新整个系统到最新的发行版，相当于升级 Raspbian 系统</li>\n<li><code>apt-get clean</code> - 删除本地所有的 deb 包（不会删除软件）</li>\n<li><code>apt-get autoclean</code> - 删除本地已经安装过的 deb 包</li>\n<li><code>apt-get check</code> - 检查是否存在未安装的软件包依赖</li>\n<li><code>apt-get source</code> - 下载 deb 源码包到本地</li>\n<li><code>apt-get download</code> - 下载 deb 包到本地</li>\n<li><code>apt-get changelog</code>- 打印软件包的版本变更日志</li>\n</ul>\n<h1 id=\"apt-cache-命令\">apt-cache 命令</h1>\n<p>apt-cache 一般用于软件包查找和显示软件包信息。</p>\n<ul>\n<li><code>apt-cache search</code> - 搜索软件包。当你不知道软件包全名的时候，可以用这个指令搜索关键词</li>\n<li><code>apt-cache depends</code> - 打印软件包的依赖包信息</li>\n<li><code>apt-cache rdepends</code> - 打印依赖这个包的软件包信息（反向依赖）</li>\n</ul>\n<h1 id=\"常用命令组合\">常用命令组合</h1>\n<h2 id=\"查看系统上安装的软件包\">查看系统上安装的软件包</h2>\n<p>查看系统上安装的所有软件包和相关状态，执行 </p>\n<pre><code class=\"language-bash\">dpkg --list</code></pre>\n<p>输出每个软件包的一行简单介绍，2 字符的状态标志，包名，所安装版本和简要描述。</p>\n<p><img src=\"/media/15831620188825.jpg\" alt=\"-w1026\"></p>\n<p>如果要过滤包名，比如只显示 python 开头的包，执行</p>\n<pre><code class=\"language-bash\">dpkg --list python*</code></pre>\n<p>要获取软件包的更详细信息，比如 python3，执行:</p>\n<pre><code class=\"language-bash\">dpkg --status python3</code></pre>\n<p>输出状态、版本号、依赖包等信息。</p>\n<p><img src=\"/media/15831621739249.jpg\" alt=\"-w1026\"></p>\n<h2 id=\"列出软件包包含的文件\">列出软件包包含的文件</h2>\n<p>要找出一个软件包包含的所有文件，比如找出 rclone 安装过程中生成了哪些文件，执行：</p>\n<pre><code class=\"language-bash\">dpkg --listfiles rclone</code></pre>\n<p><img src=\"/media/15831632195057.jpg\" alt=\"-w1026\"></p>\n<blockquote>\n<p>rclone 一是款文件同步工具，支持本地文件和 Microsoft OneDrive，Amazon Cloud Drive，Dropbox，FTP，SSH/SFTP 等多种云存储同步 —— <a href=\"https://hardcore-rpi.biko.pub/post/893a14e7-ddf1-497c-b067-ef066a85ada4.html\">如何在树莓派上免费获取 GB 级存储空间 - 硬核树莓派</a></p>\n</blockquote>\n<p>也可以直接查看 deb 包内的文件，执行：</p>\n<pre><code class=\"language-bash\">dpkg-deb --contents rclone_1.45-3_armhf.deb</code></pre>\n<p><img src=\"/media/15832443790563.jpg\" alt=\"-w1026\"></p>\n<p>还可以把 deb 包内的文件解压到当前的 temp 目录（这不是安装，而是在本地目录测试包内容的简单方法），执行：</p>\n<pre><code class=\"language-bash\">dpkg-deb --extract rclone_1.45-3_armhf.deb temp</code></pre>\n<p>但如果你只想知道某个文件是哪个软件包生成的，执行：</p>\n<pre><code class=\"language-bash\">dpkg --search rclone</code></pre>\n<p><img src=\"/media/15831631921867.jpg\" alt=\"-w1026\"></p>\n<h1 id=\"其他常用命令\">其他常用命令</h1>\n<p>Raspbian 不一定默认带有下面这些命令。如果没有的话，<code>apt-get install</code> 安装即可。</p>\n<ul>\n<li><code>apt-show-versions</code> - 打印系统中所有已安装的包的当前版本和可升级版本</li>\n<li><code>apt-config</code> - apt 的配置工具</li>\n<li><code>tasksel</code> - 用于安装软件集，例如一键安装 gnome 桌面、xfce 桌面等等。<code>--list-tasks</code> 参数可以列出所有支持的软件集。</li>\n<li><code>dselect</code> - 包管理系统的图形菜单界面，对第一次安装和大范围升级特别有用</li>\n<li><code>dpkg-deb</code> - 用于操作 deb 文件，比如探查包内文件等</li>\n<li><code>dpkg-split</code> - 大软件包分割工具，例如把一个大 deb 分割成 N 部分，每部分 460KB</li>\n</ul>\n<h1 id=\"参考资料\">参考资料</h1>\n<ul>\n<li><a href=\"https://wiki.ubuntu.org.cn/UbuntuHelp:AptGet/Howto/zh\">UbuntuHelp:AptGet/Howto/zh - Ubuntu中文</a></li>\n<li><a href=\"https://www.debian.org/doc/manuals/apt-howto/index.zh-cn.html\">APT HOWTO (Obsolete Documentation)</a></li>\n<li><a href=\"https://www.cnblogs.com/xidongyu/p/7801897.html\">Ubuntu软件包管理器 - 被罚站的树 - 博客园</a></li>\n<li><a href=\"https://salsa.debian.org/debian/packaging-tutorial\">Debian / packaging-tutorial · GitLab</a></li>\n<li><a href=\"https://www.debian.org/doc/manuals/debian-faq/ch-pkg_basics.zh-cn.html\">The Debian GNU/Linux FAQ - Debian 的包管理系统</a></li>\n<li><a href=\"https://www.debian.org/doc/manuals/debian-faq/ch-ftparchives.zh-cn.html\">The Debian GNU/Linux FAQ - Debian 的 FTP</a></li>\n<li><a href=\"https://unix.stackexchange.com/questions/509915/what-is-the-difference-between-contrib-and-non-free-packages-repositories\">debian - What is the difference between &#39;contrib&#39; and &#39;non-free&#39; packages repositories? - Unix &amp; Linux Stack Exchange</a></li>\n<li><a href=\"https://www.debian.org/doc/debian-policy/ch-archive#s-contrib\">2. The Debian Archive — Debian Policy Manual v4.5.0.0</a></li>\n<li><a href=\"https://www.debian.org/social_contract.zh-cn.html\">Debian 社群契约</a></li>\n<li><a href=\"https://www.debian.org/doc/manuals/debian-reference/ch02.zh-cn.html\">第 2 章 Debian 软件包管理</a></li>\n</ul>\n<hr>\n<ul>\n<li>网站：<a href=\"https://hardcore-rpi.biko.pub/\">https://hardcore-rpi.biko.pub/</a></li>\n<li>知乎专栏：<a href=\"https://zhuanlan.zhihu.com/hardcore-rpi\">https://zhuanlan.zhihu.com/hardcore-rpi</a></li>\n<li>GitHub: <a href=\"https://github.com/hardcore-rpi\">https://github.com/hardcore-rpi</a></li>\n<li>公众号: <a href=\"https://hardcore-rpi.biko.pub/wx.html\">https://hardcore-rpi.biko.pub/wx.html</a></li>\n<li>头条号: <a href=\"https://www.toutiao.com/c/user/1257451073577822/#mid=1659320797449220\">https://www.toutiao.com/c/user/1257451073577822/#mid=1659320797449220</a></li>\n</ul>\n<p><img src=\"https://hardcore-rpi.biko.pub/media/qrcode.png\" alt=\"公众号\"></p>\n","createDate":"2020-02-28 08:00:00","updateDate":"2020-02-28 08:00:00","meta":{"id":"aaca0b18-d74c-4676-bb98-c945afc6db59","createDate":"2020-02-28T00:00:00.000Z","categories":["系统开发"],"tags":["包管理"]}}}
+    </script>
+
+    <script src="https://cdn.bootcss.com/react/16.10.2/umd/react.production.min.js"></script>
+    <script src="https://cdn.bootcss.com/react-dom/16.10.2/umd/react-dom.production.min.js"></script>
+
+    <script data-name='detect'>
+      var isMobile = window.navigator.userAgent.toLowerCase().indexOf('mobile') >= 0;
+      var isPC = !isMobile;
+
+      if (isPC) {
+        
+          document.write('<script src="/post.pc.7ef7f72007acfb1a6427.js"><\/script>');
+        
+      }
+
+      if (isMobile) {
+        
+          document.write('<script src="/post.mobile.11d390eaabd59246fd17.js"><\/script>');
+        
+      }
+    </script>
+
+    
+    <style> body > a { display: none; } </style>
+    <script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1278605995&web_id=1278605995"></script>
+  
+  </body>
+</html>
